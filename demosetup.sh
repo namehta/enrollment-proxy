@@ -9,7 +9,7 @@ docker create -v /data/db --name dbdata debian:wheezy /bin/true
 docker run -d --name enrolldb --volumes-from dbdata mongo:2.4.14
 
 # Setup the backend app
-docker run -d --link enrolldb:mongo --name enrollment-app namehta/enrollment-demo:tomcat
+docker run -d --link enrolldb:mongo --name enrollment-app namehta/enrollment-app:tomcat
 
 # Setup the frontend app
 docker run -d --name enrollment-ui namehta/enrollment-ui
