@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Setup a new docker env if it doesn't exist
-docker-machine create -d virtualbox demodev
+#docker-machine create -d virtualbox demodev
+# Set the environment for the current session
 eval "$(docker-machine env demodev)"
 
 # Setup the MongoDB
@@ -25,5 +26,5 @@ fi
 sudo sh -c "echo '$(docker-machine ip demodev)  demoapp.example.com' >> /etc/hosts"
 
 # Load the sample data
-sleep 20
+sleep 15
 curl http://demoapp.example.com/app/util/load?numRecords=33
