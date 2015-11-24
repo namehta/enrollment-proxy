@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Setup a new docker env if it doesn't exist
-#docker-machine create -d virtualbox demodev
+docker-machine create -d virtualbox demodev
 # Set the environment for the current session
 eval "$(docker-machine env demodev)"
 
