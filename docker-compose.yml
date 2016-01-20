@@ -1,0 +1,52 @@
+# Setup the MongoDB
+dbdata:
+  volumes:
+    - /data/db
+  image: debian:wheezy
+  command: /bin/true
+enrolldb:
+  image: mongo:2.4.14
+  volumes_from: 
+    - dbdata
+  
+# Setup 3 instances of the backend app
+app-1:
+  links: 
+    - enrolldb:mongo
+  environment:
+    - VIRTUAL_HOST="*/app/*"
+  image: namehta/enrollment-app:tomcat 
+app-2:
+  links: 
+    - enrolldb:mongo
+  environment:
+    - VIRTUAL_HOST="*/app/*"
+  image: namehta/enrollment-app:tomcat
+app-3:
+  links: 
+    - enrolldb:mongo
+  environment:
+    - VIRTUAL_HOST="*/app/*"
+  image: namehta/enrollment-app:tomcat    
+
+# Setup 2 instances of the frontend app  
+ui-1:
+  environment:
+    - VIRTUAL_HOST="demoapp.example.com"
+  image: namehta/enrollment-ui
+ui-2:
+  environment:
+    - VIRTUAL_HOST="demoapp.example.com"
+  image: namehta/enrollment-ui
+  
+# Setup the proxy
+haproxy:
+  links:
+    - app-1:app-1
+    - app-2:app-2
+    - app-3:app-3        
+    - ui-1:ui-1
+    - ui-2:ui-2
+  ports:
+    - "80:80"
+  image: tutum/haproxy
