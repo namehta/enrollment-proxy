@@ -5,21 +5,14 @@ docker-machine create -d virtualbox demodev
 # Set the environment for the current session
 eval "$(docker-machine env demodev)"
 
-# Setup the MongoDB
-docker create -v /data/db --name dbdata debian:wheezy /bin/true
-docker run -d --name enrolldb --volumes-from dbdata mongo:2.4.14
+#Start the docker containers via docker-compose
+docker-compose up -d
 
-# Setup 3 instances of the backend app
-docker run -d --link enrolldb:mongo --name app-1 -e VIRTUAL_HOST="*/app/*" namehta/enrollment-app:tomcat
-docker run -d --link enrolldb:mongo --name app-2 -e VIRTUAL_HOST="*/app/*" namehta/enrollment-app:tomcat
-docker run -d --link enrolldb:mongo --name app-3 -e VIRTUAL_HOST="*/app/*" namehta/enrollment-app:tomcat
+#Scale up the web and app containers
+docker-compose scale app=3 ui=2
 
-# Setup 2 instances of the frontend app
-docker run -d --name ui-1 -e VIRTUAL_HOST="demoapp.example.com" namehta/enrollment-ui
-docker run -d --name ui-2 -e VIRTUAL_HOST="demoapp.example.com" namehta/enrollment-ui
-
-# Setup the proxy
-docker run -d -p 80:80 --link app-1:app-1 --link app-2:app-2 --link app-3:app-3 --link ui-1:ui-1 --link ui-2:ui-2 tutum/haproxy
+#Have to run this for HAProxy to pick up the new containers.  It's a docker-compose bug
+docker-compose up --force-recreate -d
 
 # Add an entry for demoapp.example.com to /etc/hosts
 if [ -n "$(grep 'demoapp.example.com' /etc/hosts)" ]
